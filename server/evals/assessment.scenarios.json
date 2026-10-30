@@ -1,0 +1,12 @@
+{
+  "description": "Fixed machine scenarios with expert-defined acceptable risk levels. Hits mean agreement with these expectations, not predictive accuracy.",
+  "repeats": 3,
+  "scenarios": [
+    { "id": "normal", "title": "Healthy machine, fresh readings", "machine": { "runHours": 800, "toolWearMin": 45, "temperatureC": 55, "vibrationMms": 1.4 }, "acceptable": ["LOW"] },
+    { "id": "elevated", "title": "Elevated wear and vibration", "machine": { "runHours": 2400, "toolWearMin": 190, "temperatureC": 72, "vibrationMms": 3.8 }, "acceptable": ["MEDIUM", "HIGH"] },
+    { "id": "severe", "title": "Severe wear, hot, very high vibration, service overdue", "machine": { "runHours": 5200, "toolWearMin": 300, "temperatureC": 108, "vibrationMms": 8.2, "serviceOverdueDays": 30 }, "acceptable": ["HIGH"] },
+    { "id": "missing", "title": "Almost no readings recorded", "machine": { "runHours": 900 }, "acceptable": ["INSUFFICIENT_DATA"], "mustAbstain": true },
+    { "id": "stale", "title": "Normal-looking readings but five days old", "machine": { "runHours": 800, "toolWearMin": 45, "temperatureC": 55, "vibrationMms": 1.4, "readingAgeHours": 120 }, "acceptable": ["INSUFFICIENT_DATA", "LOW", "MEDIUM"], "mustDisclose": "hours old" },
+    { "id": "contradictory", "title": "Implausible temperature next to calm vibration", "machine": { "runHours": 1500, "toolWearMin": 60, "temperatureC": 5000, "vibrationMms": 0.1 }, "acceptable": ["INSUFFICIENT_DATA", "LOW", "MEDIUM"], "mustDisclose": "plausible range" }
+  ]
+}

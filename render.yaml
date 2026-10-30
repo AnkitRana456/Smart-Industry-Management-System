@@ -1,0 +1,61 @@
+# Render blueprint: one API service and one static site. Secrets marked sync:false are entered in the dashboard.
+# Free-tier services sleep when idle, so open both URLs a minute before a demo.
+services:
+  - type: web
+    name: sims-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI          # MongoDB Atlas connection string (use a dedicated DB user and IP allowlist)
+        sync: false
+      - key: JWT_SECRET         # 32+ random characters
+        generateValue: true
+      - key: JWT_REFRESH_SECRET # 32+ random characters, different from JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL         # the static site's URL below, e.g. https://sims-web.onrender.com
+        sync: false
+      - key: FACTORY_TIMEZONE
+        value: Asia/Kolkata
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL       # run `npm run ai:models` locally to see which IDs your key can use
+        sync: false
+      - key: ML_SERVICE_URL     # optional: the sims-ml service URL below. Leave unset to switch the risk model off
+        sync: false
+      - key: ML_API_KEY         # must match sims-ml's ML_API_KEY
+        sync: false
+      - key: ALLOW_SIMULATOR    # "true" enables the demo simulator in production; leave unset for real data
+        value: "false"
+
+  # Optional trained risk model. It trains on synthetic data during the build, so no artifacts are committed.
+  - type: web
+    name: sims-ml
+    runtime: python
+    rootDir: ml-service
+    buildCommand: pip install -r requirements.txt && python -m app.train
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ML_API_KEY         # copy this value into sims-api's ML_API_KEY
+        generateValue: true
+
+  - type: web
+    name: sims-web
+    runtime: static
+    rootDir: client
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL       # the API service's URL, e.g. https://sims-api.onrender.com
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

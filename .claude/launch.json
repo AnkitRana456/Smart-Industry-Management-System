@@ -1,0 +1,8 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "sims-api", "runtimeExecutable": "node", "runtimeArgs": ["server/src/server.js"], "port": 5000 },
+    { "name": "sims-client", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "client", "run", "dev"], "port": 5173 },
+    { "name": "sims-ml", "runtimeExecutable": "ml-service/.venv/Scripts/python.exe", "runtimeArgs": ["-m", "uvicorn", "--app-dir", "ml-service", "app.main:app", "--port", "8000"], "port": 8000 }
+  ]
+}

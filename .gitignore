@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+server/evals/reports/
+.DS_Store
+
+# ML service
+ml-service/.venv/
+ml-service/artifacts/
+__pycache__/
+*.pyc
+.pytest_cache/

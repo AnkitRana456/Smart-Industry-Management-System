@@ -1,0 +1,3473 @@
+{
+  "info": {
+    "name": "SIMS API",
+    "description": "Generated from the OpenAPI spec. Run \"0. Sign in\" first, then any request. \"Role checks\" confirms a worker token gets 403 on staff and admin routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "password",
+      "value": "Password@123"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "workerToken",
+      "value": ""
+    },
+    {
+      "key": "id",
+      "value": ""
+    },
+    {
+      "key": "machineId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Sign in",
+      "item": [
+        {
+          "name": "Sign in as manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"manager@sims.local\",\"password\":\"{{password}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});",
+                  "pm.test('Signed in', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token', pm.response.json().data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sign in as admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"admin@sims.local\",\"password\":\"{{password}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});",
+                  "pm.test('Signed in', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token', pm.response.json().data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sign in as worker (for role checks)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"worker@sims.local\",\"password\":\"{{password}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});",
+                  "pm.test('Signed in', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('workerToken', pm.response.json().data.accessToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Role checks",
+      "item": [
+        {
+          "name": "Worker cannot create machines",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"X\",\"code\":\"X-1\"}"
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{workerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/machines",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A worker token is refused (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Worker cannot read analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{workerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "overview"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A worker token is refused (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Worker cannot use the AI analyst",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"question\":\"How many machines?\"}"
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{workerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "ask"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A worker token is refused (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Worker cannot list workers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{workerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/workers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "workers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A worker token is refused (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Worker cannot use the simulator",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"events\":1}"
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{workerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/simulate/machine-events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "simulate",
+                "machine-events"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A worker token is refused (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Worker cannot read the audit log",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{workerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit-logs"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('A worker token is refused (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/register - Create a user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Priya Singh\",\n  \"email\": \"priya@example.com\",\n  \"password\": \"Password@123\",\n  \"role\": \"worker\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/login - Sign in. Returns an access token and sets the refresh cookie",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@sims.local\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": "No authentication.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/refresh - Exchange the refresh cookie for a new access token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ],
+              "query": []
+            },
+            "description": "No authentication. Needs the httpOnly refreshToken cookie.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/logout - Sign out and revoke the refresh token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/me - The signed-in user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /users - List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Name or email"
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "disabled": true,
+                  "description": "admin, manager or worker"
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /users/{id} - Change a user's name, role or active flag",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"manager\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users/{id}/reset-password - Set a new password and revoke sessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"NewPassword@456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{id}}/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{id}}",
+                "reset-password"
+              ],
+              "query": []
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /audit-logs - Who changed what (field names only, never values)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "resource",
+                  "value": "",
+                  "disabled": true,
+                  "description": "e.g. machines"
+                }
+              ]
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Machines",
+      "item": [
+        {
+          "name": "GET /machines - List machines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true,
+                  "description": "running, idle, maintenance or offline"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Name, code or type"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /machines - Create a machine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"CNC Lathe D\",\n  \"code\": \"M-111\",\n  \"type\": \"CNC Lathe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/machines",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /machines/downtime-summary - Downtime per machine over the last N days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/downtime-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "downtime-summary"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Number of whole factory days, 1 to 90, default 7"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /machines/{id} - One machine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /machines/{id} - Edit a machine",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"runHours\": 1250\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /machines/{id} - Delete a machine and its logs",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /machines/{id}/status - Change status. Writes the downtime log, raises or resolves alerts, flags bottlen",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"offline\",\n  \"reason\": \"Sensor fault\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{id}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /machines/{id}/logs - Status history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{id}}/logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{id}}",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "GET /inventory - List inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Name, SKU or supplier"
+                },
+                {
+                  "key": "lowStock",
+                  "value": "",
+                  "disabled": true,
+                  "description": "true to show only items below their reorder level"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /inventory - Create an item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"STL-009\",\n  \"name\": \"Steel plate\",\n  \"quantity\": 100,\n  \"unit\": \"kg\",\n  \"reorderThreshold\": 40\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /inventory/low-stock - Items below their reorder level",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/low-stock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "low-stock"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /inventory/{id} - One item",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /inventory/{id} - Edit item details (not quantity)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reorderThreshold\": 60\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /inventory/{id} - Delete an item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /inventory/{id}/transactions - Stock in, out or adjust. Atomic: stock can never go negative",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"out\",\n  \"qty\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/{{id}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "{{id}}",
+                "transactions"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /inventory/{id}/transactions - Transaction history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/{{id}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inventory",
+                "{{id}}",
+                "transactions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Workforce",
+      "item": [
+        {
+          "name": "GET /workers - List workers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "workers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true,
+                  "description": "active, on_leave or terminated"
+                },
+                {
+                  "key": "department",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /workers - Create a worker and their login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ravi Kumar\",\n  \"email\": \"ravi@example.com\",\n  \"password\": \"Password@123\",\n  \"employeeId\": \"EMP-200\",\n  \"department\": \"Assembly\",\n  \"skills\": [\n    \"welding\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/workers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "workers"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /workers/me - The signed-in worker's own profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workers/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "workers",
+                "me"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /workers/{id} - One worker",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workers/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "workers",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /workers/{id} - Edit a worker",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"on_leave\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/workers/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "workers",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /workers/{id} - Deactivate a worker (history is kept)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/workers/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "workers",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /shifts - List shifts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shifts"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /shifts - Create a shift",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Night\",\n  \"startTime\": \"22:00\",\n  \"endTime\": \"06:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shifts"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /shifts/{id} - Edit a shift",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endTime\": \"07:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/shifts/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shifts",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /shifts/{id} - Delete a shift with no active workers",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/shifts/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "shifts",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /attendance/check-in - Check in. Late after the shift start plus 15 minutes",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/check-in",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "attendance",
+                "check-in"
+              ],
+              "query": []
+            },
+            "description": "Role: worker (uses their own worker profile)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /attendance/check-out - Check out",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/check-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "attendance",
+                "check-out"
+              ],
+              "query": []
+            },
+            "description": "Role: worker (uses their own worker profile)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /attendance - Attendance for a day or range. Workers only ever see their own",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "",
+                  "disabled": true,
+                  "description": "YYYY-MM-DD, default today"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true,
+                  "description": "YYYY-MM-DD"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true,
+                  "description": "YYYY-MM-DD"
+                },
+                {
+                  "key": "worker",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Worker id (staff only)"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /attendance/summary - Present, late and absent counts for a day",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "attendance",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "",
+                  "disabled": true,
+                  "description": "YYYY-MM-DD"
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /tasks - List tasks. Workers only see their own",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tasks"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "assignedTo",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true,
+                  "description": "todo, in_progress or done"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /tasks - Create a task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Inspect first-off parts\",\n  \"assignedTo\": \"<workerId>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tasks"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /tasks/{id} - Edit a task",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated title\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tasks",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /tasks/{id} - Delete a task",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tasks",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /tasks/{id}/status - Move a task. Workers may only change their own",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tasks/{{id}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tasks",
+                "{{id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Production",
+      "item": [
+        {
+          "name": "GET /orders - List production orders. Workers only see orders linked to their tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true,
+                  "description": "pending, in_progress or completed"
+                },
+                {
+                  "key": "bottleneck",
+                  "value": "",
+                  "disabled": true,
+                  "description": "true"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /orders - Create an order, optionally with the materials it uses",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product\": \"Drive shaft\",\n  \"quantity\": 300,\n  \"machines\": [\n    \"<machineId>\"\n  ],\n  \"materials\": [\n    {\n      \"item\": \"<inventoryItemId>\",\n      \"qtyPerUnit\": 0.5\n    }\n  ],\n  \"dueDate\": \"2026-11-10T00:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /orders/{id} - One order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /orders/{id} - Edit an order that is not completed",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 350\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /orders/{id} - Delete an order that is not in progress",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{id}}"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /orders/{id}/status - Move forward only: pending, in_progress, completed. Starting needs every machine a",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{id}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /orders/{id}/progress - Record total units produced so far",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"producedQty\": 120\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{id}}/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "{{id}}",
+                "progress"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "GET /alerts - List alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page number, default 1"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Page size, 1 to 100, default 20"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true,
+                  "description": "open, acknowledged or resolved"
+                },
+                {
+                  "key": "severity",
+                  "value": "",
+                  "disabled": true,
+                  "description": "info, warning or critical"
+                }
+              ]
+            },
+            "description": "Any signed-in user."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /alerts/{id}/acknowledge - Acknowledge an alert",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/{{id}}/acknowledge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "{{id}}",
+                "acknowledge"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /alerts/{id}/resolve - Resolve an alert",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/{{id}}/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alerts",
+                "{{id}}",
+                "resolve"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "GET /analytics/overview - KPIs for the dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "overview"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/downtime - Downtime per day, machine and reason",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/downtime",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "downtime"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Number of whole factory days, 1 to 90, default 7"
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/production-output - Units produced per day and product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/production-output",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "production-output"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Number of whole factory days, 1 to 90, default 7"
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/stock-trends - Stock movement and end-of-day levels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/stock-trends",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "stock-trends"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Number of whole factory days, 1 to 90, default 7"
+                },
+                {
+                  "key": "item",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Inventory item id"
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "POST /machines/{machineId}/assess-risk - Gemini condition assessment. Readings come from the database, never t",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"includeMaintenanceHistory\": true,\n  \"forceNewAssessment\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{machineId}}/assess-risk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{machineId}}",
+                "assess-risk"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager. Returns 503 until GEMINI_API_KEY and GEMINI_MODEL are set. A repeat within 15 minutes returns the saved assessment with reused: true."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /machines/{machineId}/assessments - Saved assessments, newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{machineId}}/assessments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{machineId}}",
+                "assessments"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true,
+                  "description": "1 to 50"
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "disabled": true,
+                  "description": "nextCursor from the previous page"
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /ai/status - Whether the AI provider is configured",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /ai/ask - Ask the analyst a question about operations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Which machine had the most downtime this week?\",\n  \"timeRange\": {\n    \"preset\": \"THIS_WEEK\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "ask"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager. timeRange is { preset } (TODAY, YESTERDAY, THIS_WEEK, LAST_WEEK, THIS_MONTH, LAST_MONTH, LAST_7_DAYS, LAST_30_DAYS), or { startDate, endDate } as YYYY-MM-DD in the factory timezone (inclusive, at most 92 days), or { start, end } as ISO instants. Omitted means the last 7 days."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /ai/weekly-summary - Weekly summary written from calculated figures, cached for 6 hours",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/weekly-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "weekly-summary"
+              ],
+              "query": [
+                {
+                  "key": "refresh",
+                  "value": "",
+                  "disabled": true,
+                  "description": "true to regenerate"
+                }
+              ]
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Risk model",
+      "item": [
+        {
+          "name": "POST /machines/{machineId}/ml-predict - Score a machine with the trained statistical model. Inputs come from t",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{machineId}}/ml-predict",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{machineId}}",
+                "ml-predict"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager. Returns { risk: Low|Medium|High, probability, topFactors, warnings, modelVersion, dataSource }. 422 names any missing input; 503 when the model service is off or down (the rest of the API is unaffected). Trained on synthetic data: probabilities are calibrated inside that synthetic world only. High raises one warning alert per machine."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /machines/{machineId}/ml-predictions - Saved model scores, newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/machines/{{machineId}}/ml-predictions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "machines",
+                "{{machineId}}",
+                "ml-predictions"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /ml/status - Whether the model service is enabled and reachable, with its version, held-out metrics and li",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ml/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ml",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /ml/rescore - Score every machine now (also runs hourly). Stops at the first outage",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ml/rescore",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ml",
+                "rescore"
+              ],
+              "query": []
+            },
+            "description": "Roles: admin, manager."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Simulator",
+      "item": [
+        {
+          "name": "GET /simulate/status - Simulator state",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/simulate/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "simulate",
+                "status"
+              ],
+              "query": []
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /simulate/machine-events - Run one simulation step",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"events\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/simulate/machine-events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "simulate",
+                "machine-events"
+              ],
+              "query": []
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /simulate/start - Start a background simulation (stops itself after 30 minutes)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"intervalSec\": 5,\n  \"events\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/simulate/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "simulate",
+                "start"
+              ],
+              "query": []
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /simulate/stop - Stop the background simulation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/simulate/stop",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "simulate",
+                "stop"
+              ],
+              "query": []
+            },
+            "description": "Role: admin."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response uses the standard envelope', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b).to.have.all.keys('success', 'data', 'message', 'errors');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

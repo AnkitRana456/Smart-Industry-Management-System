@@ -55,6 +55,7 @@ export async function predict(features) {
 }
 
 export const modelInfo = () => call('/model');
+export const post = (path, body) => call(path, { method: 'POST', body });
 export const sensorModelInfo = () => call('/sensor-model');
 
 export async function predictSensor(input) {

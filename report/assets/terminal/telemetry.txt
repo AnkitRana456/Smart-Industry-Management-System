@@ -1,0 +1,20 @@
+▶ Telemetry ingestion
+  ✔ stores a reading, updates the machine and returns a health score (62.3586ms)
+  ✔ is staff-only and validated (25.5756ms)
+  ✔ a reading over the limit raises one alert, escalates, and clears when it returns to normal (72.2438ms)
+  ✔ a reading that omits a field does not clear that field's alert (37.766ms)
+✔ Telemetry ingestion (885.9739ms)
+▶ History and health score
+  ✔ history is oldest first, limited to the window, and readable by workers (22.9429ms)
+  ✔ health score explains every deduction (8.1135ms)
+  ✔ computeHealth is clamped, and a healthy machine scores 100 (0.2822ms)
+  ✔ breaches reports severity per field and ignores missing values (0.2531ms)
+✔ History and health score (32.0738ms)
+ℹ tests 8
+ℹ suites 2
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2687.1564

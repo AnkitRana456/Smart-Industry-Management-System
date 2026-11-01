@@ -29,6 +29,7 @@ import { purchaseRoutes, supplierRoutes } from './modules/purchasing/purchasing.
 import leaveRoutes from './modules/leave/leave.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
 import { bomRoutes, productionPlanRoutes, qualityRoutes } from './modules/planning/planning.routes.js';
+import insightsRoutes from './modules/insights/insights.routes.js';
 import taskRoutes from './modules/tasks/task.routes.js';
 import { shiftRouter, workerRouter } from './modules/workers/worker.routes.js';
 import inventoryRoutes from './modules/inventory/inventory.routes.js';
@@ -75,6 +76,7 @@ export function createApp() {
   app.use('/api/shifts', shiftRouter);
   app.use('/api/attendance', attendanceRoutes);
   app.use('/api/tasks', taskRoutes);
+  app.use('/api/insights', insightsRoutes);
   app.use('/api/leave', leaveRoutes);
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/maintenance', maintenanceRoutes);

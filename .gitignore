@@ -13,3 +13,4 @@ ml-service/artifacts/
 __pycache__/
 *.pyc
 .pytest_cache/
+client/.vitest/

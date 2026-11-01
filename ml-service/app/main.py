@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 
 from . import config
 from .features import PredictRequest
+from .insights import AnomalyRequest, ForecastRequest, detect_anomalies, forecast
 from .predictor import Predictor
 from .sensor import SensorPredictor, SensorRequest
 
@@ -93,6 +94,14 @@ def create_app(predictor: Predictor | None = None, api_key: str | None = None, s
     @app.post("/predict-sensor", dependencies=[Depends(require_key)])
     def predict_sensor(body: SensorRequest):
         return loaded_sensor().predict(body)
+
+    @app.post("/anomaly", dependencies=[Depends(require_key)])
+    def anomaly(body: AnomalyRequest):
+        return detect_anomalies(body)
+
+    @app.post("/forecast", dependencies=[Depends(require_key)])
+    def forecast_route(body: ForecastRequest):
+        return forecast(body)
 
     return app
 

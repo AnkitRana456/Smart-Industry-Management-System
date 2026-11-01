@@ -1,0 +1,221 @@
+{
+  "measuredAt": "2026-11-01T16:34:16.732Z",
+  "server": [
+    {
+      "file": "ai-limits.test.js",
+      "tests": 2,
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "file": "analyst.test.js",
+      "tests": 33,
+      "pass": 33,
+      "fail": 0
+    },
+    {
+      "file": "analytics.test.js",
+      "tests": 11,
+      "pass": 11,
+      "fail": 0
+    },
+    {
+      "file": "assessment.test.js",
+      "tests": 27,
+      "pass": 27,
+      "fail": 0
+    },
+    {
+      "file": "auth-recovery.test.js",
+      "tests": 6,
+      "pass": 6,
+      "fail": 0
+    },
+    {
+      "file": "config.test.js",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    {
+      "file": "core.test.js",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    {
+      "file": "docs.test.js",
+      "tests": 5,
+      "pass": 5,
+      "fail": 0
+    },
+    {
+      "file": "evals.test.js",
+      "tests": 6,
+      "pass": 6,
+      "fail": 0
+    },
+    {
+      "file": "explain.test.js",
+      "tests": 6,
+      "pass": 6,
+      "fail": 0
+    },
+    {
+      "file": "gemini-client.test.js",
+      "tests": 14,
+      "pass": 14,
+      "fail": 0
+    },
+    {
+      "file": "insights.test.js",
+      "tests": 11,
+      "pass": 11,
+      "fail": 0
+    },
+    {
+      "file": "leave.test.js",
+      "tests": 9,
+      "pass": 9,
+      "fail": 0
+    },
+    {
+      "file": "maintenance.test.js",
+      "tests": 15,
+      "pass": 15,
+      "fail": 0
+    },
+    {
+      "file": "materials.test.js",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    {
+      "file": "ml.test.js",
+      "tests": 27,
+      "pass": 27,
+      "fail": 0
+    },
+    {
+      "file": "planning.test.js",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    {
+      "file": "purchasing.test.js",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    {
+      "file": "simulator.test.js",
+      "tests": 6,
+      "pass": 6,
+      "fail": 0
+    },
+    {
+      "file": "telemetry.test.js",
+      "tests": 8,
+      "pass": 8,
+      "fail": 0
+    },
+    {
+      "file": "users.test.js",
+      "tests": 16,
+      "pass": 16,
+      "fail": 0
+    },
+    {
+      "file": "workforce.test.js",
+      "tests": 17,
+      "pass": 17,
+      "fail": 0
+    }
+  ],
+  "client": [
+    {
+      "file": "src/components/AppShell.test.tsx",
+      "tests": 10,
+      "pass": 10
+    },
+    {
+      "file": "src/components/AttendanceHeatmap.test.tsx",
+      "tests": 2,
+      "pass": 2
+    },
+    {
+      "file": "src/components/MlRisk.test.tsx",
+      "tests": 9,
+      "pass": 9
+    },
+    {
+      "file": "src/components/Modal.test.tsx",
+      "tests": 1,
+      "pass": 1
+    },
+    {
+      "file": "src/components/NotificationBell.test.tsx",
+      "tests": 6,
+      "pass": 6
+    },
+    {
+      "file": "src/components/RiskAssessment.test.tsx",
+      "tests": 12,
+      "pass": 12
+    },
+    {
+      "file": "src/components/ui.test.tsx",
+      "tests": 15,
+      "pass": 15
+    },
+    {
+      "file": "src/lib/api.test.ts",
+      "tests": 10,
+      "pass": 10
+    },
+    {
+      "file": "src/lib/csv.test.ts",
+      "tests": 8,
+      "pass": 8
+    },
+    {
+      "file": "src/pages/Analyst.test.tsx",
+      "tests": 17,
+      "pass": 17
+    },
+    {
+      "file": "src/pages/Login.test.tsx",
+      "tests": 6,
+      "pass": 6
+    },
+    {
+      "file": "src/store/auth.test.ts",
+      "tests": 9,
+      "pass": 9
+    },
+    {
+      "file": "src/store/toast.test.ts",
+      "tests": 8,
+      "pass": 8
+    }
+  ],
+  "ml": [
+    {
+      "file": "test_insights.py",
+      "tests": 12,
+      "pass": 12
+    },
+    {
+      "file": "test_ml.py",
+      "tests": 27,
+      "pass": 27
+    },
+    {
+      "file": "test_sensor.py",
+      "tests": 17,
+      "pass": 17
+    }
+  ]
+}

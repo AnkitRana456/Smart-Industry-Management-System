@@ -1,0 +1,26 @@
+▶ Suppliers
+  ✔ are managed by staff, names are unique, and one with open orders cannot be deleted (90.2095ms)
+✔ Suppliers (752.3738ms)
+▶ Purchase orders
+  ✔ draft, approve, receive: receiving posts stock-in and a total is computed (105.5631ms)
+  ✔ cannot be approved without a supplier or lines, and workers have no access (40.876ms)
+  ✔ rejects duplicate items, unknown items and bad quantities (10.1988ms)
+  ✔ cancelling works on open orders only (23.9602ms)
+✔ Purchase orders (181.0417ms)
+▶ Auto-drafting from low stock
+  ✔ stock falling under the threshold drafts one order and never approves it (37.6825ms)
+  ✔ items from the same supplier share a draft, and receiving restores stock and clears the alert (79.2401ms)
+  ✔ draft-from-low-stock covers items that were already low (33.095ms)
+✔ Auto-drafting from low stock (150.6588ms)
+▶ Valuation and CSV import
+  ✔ values stock at cost and counts items without a cost separately (321.9801ms)
+  ✔ import creates new SKUs, updates existing ones with an adjust transaction, and reports bad rows (41.1771ms)
+✔ Valuation and CSV import (363.4195ms)
+ℹ tests 10
+ℹ suites 4
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3181.6255

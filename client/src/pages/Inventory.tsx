@@ -3,8 +3,9 @@ import { ArrowDownToLine, ArrowUpFromLine, Download, History, Pencil, Plus, Sear
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { api, errorMessage } from '../lib/api';
 import { downloadCsv, parseCsv } from '../lib/csv';
-import type { ImportResult, InventoryItem, Page, StockTx, Valuation } from '../lib/types';
+import type { ImportResult, InventoryItem, Page, StockCover, StockTx, Valuation } from '../lib/types';
 import SupplierSelect from '../components/SupplierSelect';
+import { useStockCover } from '../hooks/useInsights';
 import { btn, ConfirmDialog, EmptyState, Field, fmtDate, input, Modal, PageHeader, Skeleton } from '../components/ui';
 import { useAuth } from '../store/auth';
 
@@ -20,6 +21,8 @@ export default function Inventory() {
   const [deleting, setDeleting] = useState<InventoryItem | null>(null);
   const [viewing, setViewing] = useState<InventoryItem | null>(null);
   const [importing, setImporting] = useState(false);
+  const cover = useStockCover();
+  const coverBy = new Map((cover.data ?? []).map((c) => [c.itemId, c]));
   const valuation = useQuery({
     queryKey: ['inventory', 'valuation'], enabled: canEdit,
     queryFn: async () => (await api.get<{ data: Valuation }>('/inventory/valuation')).data.data,
@@ -74,6 +77,7 @@ export default function Inventory() {
               <th className="px-4 py-3 font-medium">Item</th>
               <th className="w-64 px-4 py-3 font-medium">Stock level</th>
               <th className="px-4 py-3 text-right font-medium">Quantity</th>
+              {canEdit && cover.data && <th className="px-4 py-3 font-medium" title="Forecast from recent usage by the risk-model service">Days of cover</th>}
               <th className="px-4 py-3 font-medium">Supplier</th>
               {canEdit && <th className="px-4 py-3 text-right font-medium">Record</th>}
             </tr>
@@ -99,6 +103,7 @@ export default function Inventory() {
                     {low && <div className="mt-1 text-[11px] font-medium text-red">Below reorder level ({i.reorderThreshold})</div>}
                   </td>
                   <td className="px-4 py-3 text-right font-mono tabular-nums">{i.quantity.toLocaleString()} <span className="text-muted">{i.unit}</span></td>
+                  {canEdit && cover.data && <CoverCell c={coverBy.get(i._id)} />}
                   <td className="px-4 py-3 text-muted">{i.supplier ?? '—'}</td>
                   {canEdit && (
                     <td className="px-4 py-3">
@@ -339,5 +344,19 @@ function ImportCsv({ onClose }: { onClose: () => void }) {
         {!result && <button className={btn.primary} disabled={!rows || send.isPending} onClick={() => send.mutate()}>Import</button>}
       </div>
     </Modal>
+  );
+}
+
+function CoverCell({ c }: { c?: StockCover }) {
+  if (!c || !c.enoughHistory) return <td className="px-4 py-3 text-xs text-muted" title={c?.message}>No usage yet</td>;
+  const d = c.daysOfCover;
+  const tone = d == null ? 'text-green' : d <= 7 ? 'text-red' : d <= 14 ? 'text-amber' : 'text-green';
+  const range = c.earliestDays != null && c.latestDays != null && c.earliestDays !== c.latestDays ? `, between ${c.earliestDays} and ${c.latestDays}` : '';
+  return (
+    <td className="px-4 py-3" title={`At about ${c.usagePerDay} ${c.unit} a day${range}. Based on the last 30 days of usage${c.confidence === 'low' ? ' (patchy, so treat it loosely)' : ''}.`}>
+      <span className={`font-mono text-sm font-semibold tabular-nums ${tone}`}>{d == null ? '60+ d' : `~${d} d`}</span>
+      {c.runOutOn && d != null && d <= 30 && <div className="text-[11px] text-muted">runs out {c.runOutOn}</div>}
+      {(c.suggestedOrderQty ?? 0) > 0 && <div className="text-[11px] text-muted">order ~{c.suggestedOrderQty?.toLocaleString()} {c.unit}</div>}
+    </td>
   );
 }

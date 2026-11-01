@@ -381,3 +381,43 @@ export interface AlertExplanation {
   modelId: string;
   limitation: string;
 }
+
+export interface StockCover {
+  itemId: string;
+  sku: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  enoughHistory: boolean;
+  message?: string;
+  usagePerDay?: number;
+  daysOfCover?: number | null;
+  earliestDays?: number | null;
+  latestDays?: number | null;
+  beyondHorizon?: boolean;
+  runOutOn?: string | null;
+  leadTimeDays?: number;
+  suggestedOrderQty?: number;
+  confidence?: 'ok' | 'low';
+}
+export interface OrderProjection {
+  orderId: string;
+  orderNo: string;
+  product: string;
+  remaining: number;
+  dueDate: string | null;
+  status: 'late' | 'on_track' | 'unknown' | 'done';
+  message?: string;
+  pacePerDay?: number;
+  expectedFinish?: string | null;
+  earliestFinish?: string | null;
+  latestFinish?: string | null;
+  beyondHorizon?: boolean;
+  confidence?: 'ok' | 'low';
+}
+export interface AnomalyResult {
+  historyPoints: number;
+  flagged: number;
+  note: string;
+  points: { at: string; anomalous: boolean; score: number; mostUnusual: { feature: string; value: number; typical: number; deviation: number } }[];
+}

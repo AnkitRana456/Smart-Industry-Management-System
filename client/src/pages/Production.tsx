@@ -2,8 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ClipboardCheck, History, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { api, errorMessage } from '../lib/api';
-import type { InventoryItem, Machine, Order, OrderStatus, Page } from '../lib/types';
+import type { InventoryItem, Machine, Order, OrderProjection, OrderStatus, Page } from '../lib/types';
 import { BomManager, FeasibilityBox, QualityModal } from '../components/ProductionExtras';
+import { useOrderProjections } from '../hooks/useInsights';
 import { btn, ConfirmDialog, EmptyState, Field, input, Modal, PageHeader, Skeleton } from '../components/ui';
 import { useAuth } from '../store/auth';
 import { useToasts } from '../store/toast';
@@ -35,6 +36,8 @@ export default function Production() {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overCol, setOverCol] = useState<OrderStatus | null>(null);
   const [history, setHistory] = useState<Order | null>(null);
+  const projections = useOrderProjections();
+  const projectionOf = new Map((projections.data ?? []).map((p) => [p.orderId, p]));
   const [quality, setQuality] = useState<Order | null>(null);
   const [boms, setBoms] = useState(false);
   const [search, setSearch] = useState('');
@@ -167,6 +170,7 @@ export default function Production() {
                         </div>
                         <span className={`text-[11px] font-medium ${due.late ? 'text-red' : 'text-muted'}`}>{due.text}</span>
                       </div>
+                      {projectionOf.get(o._id) && <Projection p={projectionOf.get(o._id)!} />}
                       {o.materials.length > 0 && (
                         <p className="mt-2 text-[11px] leading-snug text-muted">
                           <span className="font-medium text-fg">{o.materialsConsumed ? 'Used:' : 'Needs:'}</span>{' '}
@@ -380,5 +384,18 @@ function OrderHistory({ order, onClose }: { order: Order; onClose: () => void })
       </ul>
       <div className="mt-4 flex justify-end"><button className={btn.ghost} onClick={onClose}>Close</button></div>
     </Modal>
+  );
+}
+
+function Projection({ p }: { p: OrderProjection }) {
+  if (p.status === 'unknown') return <p className="mt-2 text-[11px] text-muted" title={p.message}>Finish not projected yet: too little output logged.</p>;
+  if (p.status !== 'late' && p.status !== 'on_track') return null;
+  const late = p.status === 'late';
+  const when = p.expectedFinish ?? 'more than 60 days away';
+  return (
+    <p className={`mt-2 rounded-md px-2 py-1 text-[11px] ${late ? 'bg-red/10 text-red' : 'bg-green/10 text-green'}`}
+      title={`At about ${p.pacePerDay} units a day over the last two weeks${p.earliestFinish && p.latestFinish ? `, between ${p.earliestFinish} and ${p.latestFinish}` : ''}.`}>
+      {late ? 'Likely late' : 'On track'}: at the current pace it finishes {when}.
+    </p>
   );
 }

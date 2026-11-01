@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { api } from '../lib/api';
-import type { Health, Machine, SensorReading } from '../lib/types';
+import { api, errorMessage } from '../lib/api';
+import { useAuth } from '../store/auth';
+import type { AnomalyResult, Health, Machine, SensorReading } from '../lib/types';
 import { axis, grid, tooltip } from './charts';
 import { Skeleton } from './ui';
 
@@ -17,6 +18,10 @@ export default function TelemetryPanel({ machine }: { machine: Machine }) {
   const health = useQuery({
     queryKey: ['telemetry', 'health', machine._id],
     queryFn: async () => (await api.get<{ data: Health }>(`/machines/${machine._id}/health-score`)).data.data,
+  });
+  const staff = useAuth((s) => s.user?.role !== 'worker');
+  const anomalies = useMutation({
+    mutationFn: async () => (await api.get<{ data: AnomalyResult }>(`/insights/machines/${machine._id}/anomalies`)).data.data,
   });
   const h = health.data;
   const rows = readings.data ?? [];
@@ -36,6 +41,32 @@ export default function TelemetryPanel({ machine }: { machine: Machine }) {
             {h.factors.map((f) => <li key={f.label} className="flex justify-between gap-2"><span className="text-muted">{f.label}</span><span className="font-mono tabular-nums text-red">−{f.penalty}</span></li>)}
           </ul>
         ))}
+
+      {staff && (
+        <div className="mt-3 rounded-lg border border-line bg-bg p-2.5" aria-label="Anomaly check">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted">Anomaly check</p>
+              <p className="text-[11px] text-muted">Learned from this machine&apos;s own last week</p>
+            </div>
+            <button className="rounded-lg border border-line px-3 py-1 text-xs hover:bg-surface-2 disabled:opacity-50" disabled={anomalies.isPending} onClick={() => anomalies.mutate()}>{anomalies.isPending ? 'Checking…' : 'Check'}</button>
+          </div>
+          {anomalies.isError && <p role="alert" className="mt-2 text-xs text-red">{errorMessage(anomalies.error)}</p>}
+          {anomalies.data && (
+            <div className="mt-2 text-xs">
+              <p className={anomalies.data.flagged ? 'font-medium text-amber' : 'text-green'}>
+                {anomalies.data.flagged ? `${anomalies.data.flagged} of the last ${anomalies.data.points.length} readings look unusual` : `The last ${anomalies.data.points.length} readings look normal for this machine`}
+              </p>
+              {anomalies.data.points.filter((p) => p.anomalous).slice(-3).map((p) => (
+                <p key={p.at} className="mt-1 text-muted">
+                  {clock(p.at)}: {p.mostUnusual.feature} {p.mostUnusual.value} against a typical {p.mostUnusual.typical}
+                </p>
+              ))}
+              <p className="mt-1 text-[11px] text-muted">{anomalies.data.note}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <h3 className="mb-1 mt-3 text-[11px] font-medium uppercase tracking-wider text-muted">Live sensors, last 2 hours</h3>
       {readings.isLoading && <Skeleton className="h-36" />}

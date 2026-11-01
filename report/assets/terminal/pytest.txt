@@ -1,0 +1,13 @@
+test_a_spike_is_flagged_and_normal_readings_mostly_are_not PASSED
+test_a_spike_far_outside_anything_seen_is_still_flagged PASSED
+test_the_most_unusual_feature_is_named_with_its_typical_value PASSED
+test_a_sensor_that_never_moves_does_not_flag_everything PASSED
+test_too_little_history_is_refused_by_validation PASSED
+test_forecast_follows_a_rising_trend_and_gives_a_range PASSED
+test_days_until_stockout_matches_simple_arithmetic_and_has_a_window PASSED
+test_stock_that_will_not_run_out_inside_the_horizon_says_so PASSED
+test_an_order_target_is_projected_the_same_way PASSED
+test_nothing_left_means_zero_days_and_forecasts_never_go_negative PASSED
+test_sparse_or_noisy_history_is_marked_low_confidence PASSED
+test_http_contract_validation_and_key PASSED
+======================== 12 passed, 1 warning in 2.33s ========================

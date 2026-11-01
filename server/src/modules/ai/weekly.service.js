@@ -4,7 +4,7 @@ import { generateJson, InvalidOutputError } from './gemini.client.js';
 import { buildWeeklyPrompt, WEEKLY_SCHEMA, WEEKLY_SYSTEM } from './prompts/analyst.v1.js';
 import { ungroundedNumbers } from './analyst.service.js';
 import { resolveRange, toAnalyticsRange } from './timeRange.js';
-import { runTool, TOOL_NAMES } from './tools.js';
+import { runTool, TOOL_NAMES, TOOLS } from './tools.js';
 
 const CACHE_MS = 6 * 3_600_000;
 const schema = z.object({ summary: z.string().min(1).max(1500), highlights: z.array(z.string().max(250)).max(5).default([]) });
@@ -16,7 +16,7 @@ export async function weeklySummary({ refresh = false } = {}, now = new Date()) 
   if (cached && !refresh && now - cached.generatedAt < CACHE_MS) return { ...JSON.parse(cached.content), cached: true };
 
   const analyticsRange = toAnalyticsRange(range);
-  const results = await Promise.all(TOOL_NAMES.map((name) => runTool({ name, args: {} }, analyticsRange, now)));
+  const results = await Promise.all(TOOL_NAMES.filter((name) => !TOOLS[name].needsMl).map((name) => runTool({ name, args: {} }, analyticsRange, now)));
   const keyFigures = results.flatMap((r) => r.keyFigures);
   const pkg = {
     reportingPeriod: { label: range.label, start: range.start.toISOString().slice(0, 10), end: range.end.toISOString().slice(0, 10), timezone: range.timezone },

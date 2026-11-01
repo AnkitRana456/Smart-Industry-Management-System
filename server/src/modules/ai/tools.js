@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Attendance, InventoryItem, Machine, MachineAssessment, OutputLog, ProductionOrder, WorkOrder, Worker } from '../../models/index.js';
 import { clean } from '../../utils/sanitize.js';
 import * as analytics from '../analytics/analytics.service.js';
+import * as insights from '../insights/insights.service.js';
 
 /**
  * The only data the analyst can reach. Each tool has a strict argument schema, runs fixed
@@ -240,6 +241,47 @@ export const TOOLS = {
           fig('Overdue work orders', overdue, 'work orders'), fig('Urgent work orders', urgent, 'work orders'),
           fig('Work orders completed in the period', completed, 'work orders'),
         ],
+      };
+    },
+  },
+
+  getStockForecast: {
+    needsMl: true, // the weekly summary skips tools that depend on the risk-model service being up
+    description: 'Forecast of how many days each inventory item will last at its recent usage, with a suggested reorder quantity. Learned from usage history by the risk-model service. Optional filter: search (name or SKU).',
+    args: z.object({ search: text.optional() }),
+    async run(_range, args, now) {
+      let rows = await insights.fleetStockCover();
+      if (args.search) { const re = contains(args.search); rows = rows.filter((r) => re.test(r.name) || re.test(r.sku)); }
+      const known = rows.filter((r) => r.enoughHistory);
+      const soon = known.filter((r) => r.daysOfCover != null && r.daysOfCover <= 14);
+      return {
+        recordCount: known.length,
+        asOf: now,
+        data: {
+          itemsForecast: known.length, itemsWithoutHistory: rows.length - known.length, runningOutWithin14Days: soon.length,
+          items: known.slice(0, 8).map((r) => ({ sku: clean(r.sku, 30), name: clean(r.name, 60), unit: r.unit, quantity: r.quantity, usagePerDay: r.usagePerDay, daysOfCover: r.daysOfCover, earliestDays: r.earliestDays, latestDays: r.latestDays, suggestedOrderQty: r.suggestedOrderQty, confidence: r.confidence })),
+        },
+        keyFigures: [fig('Items forecast', known.length, 'items'), fig('Items running out within 14 days', soon.length, 'items'), ...(soon[0] ? [fig(`Days of cover for ${clean(soon[0].name, 40)}`, soon[0].daysOfCover, 'days')] : [])],
+      };
+    },
+  },
+
+  getOrderProjections: {
+    needsMl: true, // the weekly summary skips tools that depend on the risk-model service being up
+    description: 'Projected finish date of each in-progress production order at its recent pace, and whether that is before its due date. Learned from logged output by the risk-model service. Optional filter: product.',
+    args: z.object({ product: text.optional() }),
+    async run(_range, args, now) {
+      let rows = await insights.orderProjections();
+      if (args.product) { const re = contains(args.product); rows = rows.filter((r) => re.test(r.product) || re.test(r.orderNo)); }
+      const late = rows.filter((r) => r.status === 'late');
+      return {
+        recordCount: rows.length,
+        asOf: now,
+        data: {
+          ordersInProgress: rows.length, projectedLate: late.length,
+          orders: rows.slice(0, 8).map((r) => ({ orderNo: r.orderNo, product: clean(r.product, 60), status: r.status, remaining: r.remaining, pacePerDay: r.pacePerDay ?? null, dueDate: r.dueDate, expectedFinish: r.expectedFinish ?? null, confidence: r.confidence ?? null })),
+        },
+        keyFigures: [fig('Orders in progress', rows.length, 'orders'), fig('Orders projected to finish late', late.length, 'orders')],
       };
     },
   },

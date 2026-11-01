@@ -6,6 +6,7 @@ import { api } from '../lib/api';
 import type { Alert, DowntimeReport, Machine, MachineStatus, OutputReport, Overview, Page } from '../lib/types';
 import { axis, ChartCard, fmtDay, grid, tooltip } from '../components/charts';
 import SimulatorControl from '../components/SimulatorControl';
+import { useOrderProjections, useStockCover } from '../hooks/useInsights';
 import { fmtDate, fmtMins, PageHeader, Skeleton } from '../components/ui';
 import { useAuth } from '../store/auth';
 
@@ -47,6 +48,10 @@ function StaffDashboard() {
     queryFn: async () => (await api.get<{ data: DowntimeReport }>('/analytics/downtime', { params: { days: 7 } })).data.data,
   });
 
+  const cover = useStockCover();
+  const projections = useOrderProjections();
+  const runningOut = (cover.data ?? []).filter((c) => c.enoughHistory && c.daysOfCover != null && c.daysOfCover <= 14).slice(0, 4);
+  const lateOrders = (projections.data ?? []).filter((p) => p.status === 'late').slice(0, 4);
   const o = overview.data;
   const present = o ? o.attendance.present + o.attendance.late : 0;
 
@@ -130,6 +135,31 @@ function StaffDashboard() {
           </div>
         </section>
       </div>
+
+      {(cover.data || projections.data) && (
+        <section className="mb-5 grid gap-4 rounded-2xl border border-line bg-surface p-4 md:grid-cols-2" aria-label="Forecasts">
+          <div>
+            <h2 className="mb-2 font-display text-sm font-semibold">Running out soon <span className="text-[11px] font-normal text-muted">forecast from usage</span></h2>
+            {runningOut.length === 0 ? <p className="text-sm text-muted">Nothing is forecast to run out in the next two weeks.</p> : (
+              <ul className="flex flex-col gap-1.5 text-sm">
+                {runningOut.map((c) => (
+                  <li key={c.itemId} className="flex justify-between gap-2"><span>{c.name}</span><span className="font-mono tabular-nums text-amber">~{c.daysOfCover} d{(c.suggestedOrderQty ?? 0) > 0 && <span className="text-muted"> · order ~{c.suggestedOrderQty?.toLocaleString()} {c.unit}</span>}</span></li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div>
+            <h2 className="mb-2 font-display text-sm font-semibold">Orders likely to be late <span className="text-[11px] font-normal text-muted">at the current pace</span></h2>
+            {lateOrders.length === 0 ? <p className="text-sm text-muted">No in-progress order is projected to miss its due date.</p> : (
+              <ul className="flex flex-col gap-1.5 text-sm">
+                {lateOrders.map((p) => (
+                  <li key={p.orderId} className="flex justify-between gap-2"><span>{p.orderNo} {p.product}</span><span className="font-mono text-xs tabular-nums text-red">{p.expectedFinish ?? '60+ d'} vs due {p.dueDate?.slice(0, 10)}</span></li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title="Units produced" subtitle="Last 7 days" loading={output.isLoading} empty={output.data?.totalUnits === 0 ? 'No output recorded in this period.' : undefined}>

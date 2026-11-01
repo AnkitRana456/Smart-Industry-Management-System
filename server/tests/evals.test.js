@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
 
 const read = (f) => JSON.parse(readFileSync(new URL(`../evals/${f}`, import.meta.url), 'utf8'));
-const TOOLS = ['getMachineStatus', 'getDowntimeSummary', 'getProductionSummary', 'getInventoryStatus', 'getSavedMaintenanceAssessments', 'getWorkerAttendance', 'getMaintenanceWorkOrders', 'getReliability'];
+const TOOLS = ['getMachineStatus', 'getDowntimeSummary', 'getProductionSummary', 'getInventoryStatus', 'getSavedMaintenanceAssessments', 'getWorkerAttendance', 'getMaintenanceWorkOrders', 'getReliability', 'getStockForecast', 'getOrderProjections'];
 const PRESETS = ['TODAY', 'YESTERDAY', 'THIS_WEEK', 'LAST_WEEK', 'THIS_MONTH', 'LAST_MONTH', 'LAST_7_DAYS', 'LAST_30_DAYS'];
 
 describe('Evaluation datasets', () => {

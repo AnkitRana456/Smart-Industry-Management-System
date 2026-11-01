@@ -1,0 +1,55 @@
+{
+  "measuredAt": "2026-11-01T16:29:54.106Z",
+  "environment": "local development machine, API and MongoDB on the same host, sequential requests",
+  "api": [
+    {
+      "endpoint": "GET /api/machines",
+      "requests": 40,
+      "medianMs": 4.5,
+      "p95Ms": 7.4,
+      "maxMs": 7.9
+    },
+    {
+      "endpoint": "GET /api/orders",
+      "requests": 40,
+      "medianMs": 9.4,
+      "p95Ms": 11.6,
+      "maxMs": 13.9
+    },
+    {
+      "endpoint": "GET /api/inventory",
+      "requests": 40,
+      "medianMs": 3.9,
+      "p95Ms": 5.7,
+      "maxMs": 6.6
+    },
+    {
+      "endpoint": "GET /api/analytics/overview",
+      "requests": 40,
+      "medianMs": 7,
+      "p95Ms": 11.8,
+      "maxMs": 12.4
+    },
+    {
+      "endpoint": "GET /api/analytics/downtime",
+      "requests": 40,
+      "medianMs": 5.4,
+      "p95Ms": 9.7,
+      "maxMs": 10.4
+    },
+    {
+      "endpoint": "GET /api/alerts",
+      "requests": 40,
+      "medianMs": 4.7,
+      "p95Ms": 8.8,
+      "maxMs": 15.4
+    }
+  ],
+  "socket": {
+    "trials": 20,
+    "delivered": 20,
+    "medianMs": 7.8,
+    "p95Ms": 13.3,
+    "maxMs": 13.3
+  }
+}
